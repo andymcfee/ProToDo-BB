@@ -3,9 +3,64 @@
 module.exports = function(grunt) {
   "use strict";
 
+  // show elapsed time at the end
+  require('time-grunt')(grunt);
+  // load all grunt tasks
+  require('load-grunt-tasks')(grunt);
+
+  // configurable paths
+  var yeomanConfig = {
+    app: 'app',
+    dist: 'dist'
+  };
+
   grunt.initConfig({
+    yeoman: yeomanConfig,
+
+    watch: {
+      coffee: {
+        files: ['<%= yeoman.app %>/scripts/{,*/}*.coffee'],
+        tasks: ['coffee:dist']
+      },
+      coffeeTest: {
+        files: ['test/spec/{,*/}*.coffee'],
+        tasks: ['coffee:test']
+      },
+      compass: {
+        files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
+        tasks: ['compass:server', 'autoprefixer']
+      },
+      styles: {
+        files: ['<%= yeoman.app %>/styles/{,*/}*.css'],
+        tasks: ['copy:styles', 'autoprefixer']
+      },
+      livereload: {
+        options: {
+          livereload: '<%= connect.options.livereload %>'
+        },
+        files: [
+          '<%= yeoman.app %>/*.html',
+          '.tmp/styles/{,*/}*.css',
+          '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
+          '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
+        ]
+      }
+    },
+
     // Empty and remove `dist/` directory.
-    clean: ["dist/"],
+    clean: {
+      dist: {
+        files: [{
+          dot: true,
+          src: [
+            '.tmp',
+            '<%= yeoman.dist %>/*',
+            '!<%= yeoman.dist %>/.git*'
+          ]
+        }]
+      },
+      server: '.tmp'
+    },
 
     // Run your source code through JSHint's defaults.
     jshint: ["app/**/*.js"],
@@ -73,6 +128,80 @@ module.exports = function(grunt) {
       }
     },
 
+    compass: {
+      options: {
+        sassDir: '<%= yeoman.app %>/styles',
+        cssDir: '.tmp/styles',
+        generatedImagesDir: '.tmp/images/generated',
+        imagesDir: '<%= yeoman.app %>/images',
+        javascriptsDir: '<%= yeoman.app %>/scripts',
+        fontsDir: '<%= yeoman.app %>/styles/fonts',
+        importPath: '<%= yeoman.app %>/bower_components',
+        httpImagesPath: '/images',
+        httpGeneratedImagesPath: '/images/generated',
+        httpFontsPath: '/styles/fonts',
+        relativeAssets: false
+      },
+      dist: {
+        options: {
+          generatedImagesDir: '<%= yeoman.dist %>/images/generated'
+        }
+      },
+      server: {
+        options: {
+          debugInfo: true
+        }
+      }
+    },
+
+    autoprefixer: {
+      options: {
+        browsers: ['last 1 version']
+      },
+      dist: {
+        files: [{
+          expand: true,
+          cwd: '.tmp/styles/',
+          src: '{,*/}*.css',
+          dest: '.tmp/styles/'
+        }]
+      }
+    },
+
+    // Create the server and livereload on changes
+    connect: {
+      options: {
+        port: 9000,
+        livereload: 35729,
+        // change this to '0.0.0.0' to access the server from outside
+        hostname: 'localhost'
+      },
+      livereload: {
+        options: {
+          open: true,
+          base: [
+            '.tmp',
+            yeomanConfig.app
+          ]
+        }
+      },
+      test: {
+        options: {
+          base: [
+            '.tmp',
+            'test',
+            yeomanConfig.app,
+          ]
+        }
+      },
+      dist: {
+        options: {
+          open: true,
+          base: yeomanConfig.dist
+        }
+      }
+    },
+
     // Minfiy the distribution CSS.
     cssmin: {
       release: {
@@ -125,6 +254,49 @@ module.exports = function(grunt) {
             dest: "dist/"
           }
         ]
+      },
+      dist: {
+        files: [{
+          expand: true,
+          dot: true,
+          cwd: '<%= yeoman.app %>',
+          dest: '<%= yeoman.dist %>',
+          src: [
+            '*.{ico,png,txt}',
+            '.htaccess',
+            'images/{,*/}*.{webp,gif}',
+            'styles/fonts/{,*/}*.*',
+            'bower_components/sass-bootstrap/fonts/*.*'
+          ]
+        }]
+      },
+      styles: {
+        expand: true,
+        dot: true,
+        cwd: '<%= yeoman.app %>/styles',
+        dest: '.tmp/styles/',
+        src: '{,*/}*.css'
+      }
+    },
+
+    coffee: {
+      dist: {
+        files: [{
+          expand: true,
+          cwd: '<%= yeoman.app %>/scripts',
+          src: '{,*/}*.coffee',
+          dest: '.tmp/scripts',
+          ext: '.js'
+        }]
+      },
+      test: {
+        files: [{
+          expand: true,
+          cwd: 'test/spec',
+          src: '{,*/}*.coffee',
+          dest: '.tmp/spec',
+          ext: '.js'
+        }]
       }
     },
 
@@ -162,30 +334,75 @@ module.exports = function(grunt) {
           ]
         }
       }
-
+    },
+    modernizr: {
+      devFile: '<%= yeoman.app %>/bower_components/modernizr/modernizr.js',
+      outputFile: '<%= yeoman.dist %>/bower_components/modernizr/modernizr.js',
+      files: [
+        '<%= yeoman.dist %>/scripts/{,*/}*.js',
+        '<%= yeoman.dist %>/styles/{,*/}*.css',
+        '!<%= yeoman.dist %>/scripts/vendor/*'
+      ],
+      uglify: true
+    },
+    concurrent: {
+      server: [
+        'compass',
+        'coffee:dist',
+        'copy:styles'
+      ],
+      test: [
+        'coffee',
+        'copy:styles'
+      ],
+      dist: [
+        'coffee',
+        'compass',
+        'copy:styles',
+        'imagemin',
+        'svgmin',
+        'htmlmin'
+      ]
+    },
+    bower: {
+      options: {
+        exclude: ['modernizr']
+      },
+      all: {
+        rjsConfig: '<%= yeoman.app %>/scripts/main.js'
+      }
     }
   });
 
-  // Grunt contribution tasks.
-  grunt.loadNpmTasks("grunt-contrib-clean");
-  grunt.loadNpmTasks("grunt-contrib-jshint");
-  grunt.loadNpmTasks("grunt-contrib-cssmin");
-  grunt.loadNpmTasks("grunt-contrib-copy");
+  grunt.registerTask('server', function (target) {
+    if (target === 'dist') {
+      return grunt.task.run(['build', 'connect:dist:keepalive']);
+    }
 
-  // Third-party tasks.
-  grunt.loadNpmTasks("grunt-karma");
-  grunt.loadNpmTasks("grunt-processhtml");
-
-  // Grunt BBB tasks.
-  grunt.loadNpmTasks("grunt-bbb-server");
-  grunt.loadNpmTasks("grunt-bbb-requirejs");
-  grunt.loadNpmTasks("grunt-bbb-styles");
+    grunt.task.run([
+      'clean:server',
+      'concurrent:server',
+      'autoprefixer',
+      'connect:livereload',
+      'watch'
+    ]);
+  });
 
   // When running the default Grunt command, just lint the code.
   grunt.registerTask("default", [
-    "clean", "jshint", "processhtml", "copy", "requirejs", "styles", "cssmin"
+    "clean"
+    , "jshint"
+    , "processhtml"
+    , "copy"
+    , "requirejs"
+    , "styles"
+    , "cssmin"
   ]);
 
   // The test task take care of starting test server and running tests.
-  grunt.registerTask("test", ["jshint", "server:test", "karma"]);
+  grunt.registerTask("test", [
+    "jshint"
+    , "server:test"
+    , "karma"
+  ]);
 };
