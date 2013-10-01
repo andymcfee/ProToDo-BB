@@ -6,6 +6,7 @@
     "todomvc-common": "~0.1.7",
     "underscore": "~1.4.4",
     "backbone.localStorage": "~1.1.6",
-    "backbone.marionette": "~1.0.4"
+    "backbone.marionette": "~1.0.4",
+    "sass-bootstrap": "~3.0.0"
   }
 }
