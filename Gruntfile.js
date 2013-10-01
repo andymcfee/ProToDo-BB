@@ -30,6 +30,21 @@ module.exports = function(grunt) {
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
+    compass: {                  // Task
+      dist: {                   // Target
+        options: {              // Target options
+          sassDir: 'sass',
+          cssDir: 'css',
+          environment: 'production'
+        }
+      },
+      dev: {                    // Another target
+        options: {
+          sassDir: 'sass',
+          cssDir: 'css'
+        }
+      }
+    },
     jshint: {
       options: {
         curly: true,
@@ -76,8 +91,14 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-compass');
 
   // Default task.
   grunt.registerTask('default', ['jshint', 'qunit', 'concat', 'uglify']);
+
+  grunt.registerTask('server', [
+    'watch',
+    'compass'
+  ])
 
 };
