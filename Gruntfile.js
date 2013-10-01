@@ -10,7 +10,7 @@ module.exports = function(grunt) {
 
   // configurable paths
   var yeomanConfig = {
-    app: 'app',
+    app: '.',
     dist: 'dist'
   };
 
@@ -207,6 +207,11 @@ module.exports = function(grunt) {
       release: {
         files: {
           "dist/styles.min.css": ["dist/styles.css"]
+        }
+      },
+      server: {
+        files: {
+
         }
       }
     },
