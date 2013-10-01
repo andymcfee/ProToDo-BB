@@ -1,4 +1,2 @@
-ProToDo-BB
-==========
-
-ToDo List Prototype with BackboneJS
+# Install
+1. `bower install`
